@@ -1,48 +1,40 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import logo from "./logo.svg";
+import "./App.css";
+// @ts-ignore
+import Worker from "./pyodide.worker";
+import { asyncRun } from "./py-worker";
 
-import { asyncRun } from './py-worker.js';
-
+/* eslint-disable */
 function App() {
-
   const script = `
-      import statistics
-      from js import A_rank
-      statistics.stdev(A_rank)
+    import statistics
+    from js import A_rank
+    statistics.stdev(A_rank)
   `;
 
+  const [result, setResult] = React.useState(null);
+
   const context = {
-      A_rank: [0.8, 0.4, 1.2, 3.7, 2.6, 5.8],
-  }
+    A_rank: [0.8, 0.4, 1.2, 3.7, 2.6, 5.8],
+  };
 
-  async function main(){
-    const {results, error} = await asyncRun(script, context);
-    if (results) {
-        console.log('pyodideWorker return results: ', results);
-    } else if (error) {
-        console.log('pyodideWorker error: ', error);
-    }
-  }
+  asyncRun(script, context).then((val) => result || setResult(val));
 
-  main()
+  // const worker = new Worker();
+  // worker.postMessage({
+  //   question:
+  //     "The Answer to the Ultimate Question of Life, The Universe, and Everything.",
+  // });
+
+  // // @ts-ignore
+  // worker.onmessage = (event) => {
+  //   console.log(event);
+  // };
 
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <header className="App-header">{JSON.stringify(result)}</header>
     </div>
   );
 }
