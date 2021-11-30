@@ -26,6 +26,7 @@ const ModuleNotFoundPlugin = require("react-dev-utils/ModuleNotFoundPlugin");
 const ForkTsCheckerWebpackPlugin = require("react-dev-utils/ForkTsCheckerWebpackPlugin");
 const typescriptFormatter = require("react-dev-utils/typescriptFormatter");
 const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 const postcssNormalize = require("postcss-normalize");
 
@@ -95,7 +96,6 @@ module.exports = function (webpackEnv) {
   const env = getClientEnvironment(paths.publicUrlOrPath.slice(0, -1));
 
   const shouldUseReactRefresh = env.raw.FAST_REFRESH;
-
   // common function to get style loaders
   const getStyleLoaders = (cssOptions, preProcessor) => {
     const loaders = [
@@ -157,7 +157,7 @@ module.exports = function (webpackEnv) {
     }
     return loaders;
   };
-
+  console.log({ paths });
   return {
     mode: isEnvProduction ? "production" : isEnvDevelopment && "development",
     // Stop compilation early in production
@@ -171,28 +171,30 @@ module.exports = function (webpackEnv) {
     // This means they will be the "root" imports that are included in JS bundle.
     entry:
       isEnvDevelopment && !shouldUseReactRefresh
-        ? [
-            // Include an alternative client for WebpackDevServer. A client's job is to
-            // connect to WebpackDevServer by a socket and get notified about changes.
-            // When you save a file, the client will either apply hot updates (in case
-            // of CSS changes), or refresh the page (in case of JS changes). When you
-            // make a syntax error, this client will display a syntax error overlay.
-            // Note: instead of the default WebpackDevServer client, we use a custom one
-            // to bring better experience for Create React App users. You can replace
-            // the line below with these two lines if you prefer the stock client:
-            //
-            // require.resolve('webpack-dev-server/client') + '?/',
-            // require.resolve('webpack/hot/dev-server'),
-            //
-            // When using the experimental react-refresh integration,
-            // the webpack plugin takes care of injecting the dev client for us.
-            webpackDevClientEntry,
-            // Finally, this is your app's code:
-            paths.appIndexJs,
-            // We include the app code last so that if there is a runtime error during
-            // initialization, it doesn't blow up the WebpackDevServer client, and
-            // changing JS code would still trigger a refresh.
-          ]
+        ? {
+            main: [
+              // Include an alternative client for WebpackDevServer. A client's job is to
+              // connect to WebpackDevServer by a socket and get notified about changes.
+              // When you save a file, the client will either apply hot updates (in case
+              // of CSS changes), or refresh the page (in case of JS changes). When you
+              // make a syntax error, this client will display a syntax error overlay.
+              // Note: instead of the default WebpackDevServer client, we use a custom one
+              // to bring better experience for Create React App users. You can replace
+              // the line below with these two lines if you prefer the stock client:
+              //
+              // require.resolve('webpack-dev-server/client') + '?/',
+              // require.resolve('webpack/hot/dev-server'),
+              //
+              // When using the experimental react-refresh integration,
+              // the webpack plugin takes care of injecting the dev client for us.
+              webpackDevClientEntry,
+              // Finally, this is your app's code:
+              paths.appIndexJs,
+              // We include the app code last so that if there is a runtime error during
+              // initialization, it doesn't blow up the WebpackDevServer client, and
+              // changing JS code would still trigger a refresh.
+            ],
+          }
         : paths.appIndexJs,
     output: {
       // The build folder.
@@ -557,7 +559,7 @@ module.exports = function (webpackEnv) {
         },
         {
           test: /\.(worker\.js|worker\.ts)$/,
-          use: { loader: "worker-loader" },
+          loader: "worker-loader",
         },
       ],
     },
@@ -742,6 +744,16 @@ module.exports = function (webpackEnv) {
             },
           },
         }),
+      // Serving local pyodide package
+      new CopyWebpackPlugin({
+        patterns: [
+          {
+            from: "src/pyodide",
+            to: "static/js/pyodide",
+            force: true,
+          },
+        ],
+      }),
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.
     // Tell webpack to provide empty mocks for them so importing them works.

@@ -2,11 +2,11 @@
 // // more experienced people will now how to modify the script anyway.
 
 /* eslint-disable */
-importScripts("https://cdn.jsdelivr.net/pyodide/v0.18.1/full/pyodide.js");
+importScripts("pyodide/pyodide.js");
 
 async function loadPyodideAndPackages() {
   self.pyodide = await loadPyodide({
-    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.18.1/full/",
+    indexURL: "pyodide",
   });
   await self.pyodide.loadPackage(["numpy", "pytz"]);
 }
