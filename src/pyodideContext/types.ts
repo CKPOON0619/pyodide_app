@@ -1,8 +1,8 @@
-export type State = "Loading" | "Ready";
+export type State = "Start" | "Loading" | "Ready";
 
 export interface PyodideState {
   state: State;
-  return: any;
+  return?: any;
 }
 
 export interface PyodidePayLoad {

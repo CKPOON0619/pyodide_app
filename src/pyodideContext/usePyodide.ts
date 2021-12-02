@@ -12,13 +12,11 @@ export function usePyodide() {
 
   const { asyncRun } = PyodideContextValue;
   const [state, setState] = React.useState<PyodideState>({
-    state: "Ready",
-    return: null,
+    state: "Start",
   });
   const execScript = React.useCallback(
     ({ packages, context, script }: PyodidePayLoad) => {
-      console.log("here");
-      setState({ state: "Loading", return: null });
+      setState({ state: "Loading" });
       const runResult = asyncRun({
         packages,
         context,
