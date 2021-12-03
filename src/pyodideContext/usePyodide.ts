@@ -11,19 +11,19 @@ export function usePyodide() {
   }
 
   const { asyncRun } = PyodideContextValue;
-  const [state, setState] = React.useState<PyodideState>({
+  const [pyodideState, setPyodideState] = React.useState<PyodideState>({
     state: "Start",
   });
   const execScript = React.useCallback(
     ({ packages, context, script }: PyodidePayLoad) => {
-      setState({ state: "Loading" });
+      setPyodideState({ state: "Loading" });
       const runResult = asyncRun({
         packages,
         context,
         script,
       });
       runResult.then((res: any) => {
-        setState({ state: "Ready", return: res.data });
+        setPyodideState({ state: "Ready", return: res.data });
       });
     },
     [asyncRun]
@@ -31,6 +31,6 @@ export function usePyodide() {
 
   return {
     execScript,
-    state,
+    pyodideState,
   };
 }
