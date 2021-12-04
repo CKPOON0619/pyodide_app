@@ -18,7 +18,7 @@ const createDefaultScript = (
   script: string
 ) => {
   const importSearch = script.match(
-    /###<Package imports>###\n([\n\w\W\s]*)\n###/
+    /###<Package imports>###\n([\n\w\W\s]*)\n###<Context/
   );
   const mainScriptSearch = script.split("###<Script>###");
   const importScript = importSearch ? importSearch[1] : "";
@@ -27,23 +27,20 @@ const createDefaultScript = (
   const newImports = imports
     .map((lib) => `import ${lib}`)
     .filter((importStatement) => script.search(importStatement) < 0);
-  return `###<Package imports>###${importScript ? "\n" + importScript : ""}${
+  return `###<Package imports>###${importScript ? `\n${importScript}` : ""}${
     newImports.length > 0 ? "\n" + newImports.join("\n") : ""
   }\n###<Context variables>###${
     variables.length > 0 ? "\nfrom js import " + variables.join(", ") : ""
   }\n###<Script>###\n${mainScriptScript}`;
 };
 const removeImportFromScript = (pkg: string, script: string) => {
-  const importRegex = new RegExp(`import ${pkg}` + "[\\s\\w]*\n");
-  console.log({ script, importRegex });
+  const importRegex = new RegExp(`import ${pkg}[\\s\\w]*\n`);
   return script.replace(importRegex, "");
 };
-
 const refreshContextVarFromScript = (
   varNames: Array<string>,
   script: string
 ) => {
-  console.log({ script, varNames });
   return script.replace(
     /###<Context variables>###\n([\W\w]*)###<Script>###/,
     varNames.length > 0
@@ -57,11 +54,9 @@ const refreshContextVarFromScript = (
 const PyodideSlide: React.VoidFunctionComponent = () => {
   const { execScript, pyodideState } = usePyodide();
   const [packages, setPackages] = React.useState<Array<string>>([]);
-  const [script, setScript] = React.useState<string>(`
-  ###<Package imports>###
-  ###<Context variables>###
-  ###<Script>###
-  `);
+  const [script, setScript] = React.useState<string>(
+    "###<Package imports>###\n###<Context variables>###\n###<Script>###"
+  );
 
   function onChange(newValue: string) {
     setScript(newValue);
@@ -150,9 +145,11 @@ const PyodideSlide: React.VoidFunctionComponent = () => {
     },
     [script]
   );
+  console.log({ script });
   return (
     <div>
       <Upload
+        accept=".txt, .csv"
         multiple={true}
         name="file"
         headers={{ authorization: "authorization-text" }}
