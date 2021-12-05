@@ -18,65 +18,63 @@ interface RunScriptPayload {
   script: Script;
 }
 
-const PyodideProvider: React.VoidFunctionComponent<PyodideProviderProps> = ({
-  children,
-}) => {
-  const worker = React.useRef<any>(null);
+interface RunScriptSetup extends RunScriptPayload {
+  onError: (error: string) => any;
+  onSuccess: (data: any) => any;
+}
 
-  const runScript = React.useCallback(
-    (
-      packages: Array<Package>,
-      context: Context,
-      script: Script,
-      onSuccess: (data: any) => any,
-      onError: (error: string) => any
-    ) => {
-      if (worker.current) {
-        worker.current.onerror = onError;
-        worker.current.onmessage = onSuccess;
-        worker.current.postMessage({
-          packages,
-          context,
-          script,
+const PyodideWorkerProvider: React.VoidFunctionComponent<PyodideProviderProps> =
+  ({ children }) => {
+    const worker = React.useRef<any>(null);
+
+    const runScript = React.useCallback(
+      ({ packages, context, script, onSuccess, onError }: RunScriptSetup) => {
+        if (worker.current) {
+          worker.current.onerror = onError;
+          worker.current.onmessage = onSuccess;
+          worker.current.postMessage({
+            packages,
+            context,
+            script,
+          });
+        }
+      },
+      []
+    );
+
+    const asyncRun = React.useCallback(
+      ({ packages, context, script }: RunScriptPayload) => {
+        return new Promise(function (onSuccess, onError) {
+          runScript({ packages, context, script, onSuccess, onError });
         });
+      },
+      [runScript]
+    );
+
+    React.useEffect(() => {
+      if (!worker.current) {
+        worker.current = new PyodideWorker();
       }
-    },
-    []
-  );
 
-  const asyncRun = React.useCallback(
-    ({ packages, context, script }: RunScriptPayload) => {
-      return new Promise(function (onSuccess, onError) {
-        runScript(packages, context, script, onSuccess, onError);
-      });
-    },
-    [runScript]
-  );
+      return () => {
+        if (worker.current) {
+          worker.current.terminate();
+          worker.current = null;
+        }
+      };
+    }, []);
 
-  React.useEffect(() => {
-    if (!worker.current) {
-      worker.current = new PyodideWorker();
-    }
+    return (
+      <PyodideContext.Provider
+        value={{
+          pyodide: worker.current,
+          asyncRun,
+          runScript,
+        }}
+      >
+        {children}
+      </PyodideContext.Provider>
+    );
+  };
 
-    return () => {
-      if (worker.current) {
-        worker.current.terminate();
-        worker.current = null;
-      }
-    };
-  }, []);
-
-  return (
-    <PyodideContext.Provider
-      value={{
-        pyodide: worker.current,
-        asyncRun,
-        runScript,
-      }}
-    >
-      {children}
-    </PyodideContext.Provider>
-  );
-};
-
-export default PyodideProvider;
+export default PyodideWorkerProvider;

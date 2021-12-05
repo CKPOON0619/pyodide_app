@@ -1,16 +1,16 @@
 import React from "react";
 import "./App.css";
 // @ts-ignore
-import PyodideProvider from "./pyodideContext/PyodideProvider";
+import PyodideWorkerProvider from "./pyodideContext/PyodideWorkerProvider";
 import PyodideSlide from "./PyodideSlide"; /* eslint-disable */
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <PyodideProvider>
+        <PyodideWorkerProvider>
           <PyodideSlide />
-        </PyodideProvider>
+        </PyodideWorkerProvider>
       </header>
     </div>
   );
