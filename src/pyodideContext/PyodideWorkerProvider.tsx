@@ -3,24 +3,10 @@ import * as React from "react";
 /*@ts-ignore*/
 import PyodideWorker from "./pyodide.worker.js";
 import PyodideContext from "./PyodideContext";
+import { PyodidePayLoad, PyodideRunScript } from "./types.js";
 
 interface PyodideProviderProps {
   children?: React.ReactNode;
-}
-
-type Package = string;
-type Context = Record<string, any>;
-type Script = string;
-
-interface RunScriptPayload {
-  packages: Array<Package>;
-  context: Context;
-  script: Script;
-}
-
-interface RunScriptSetup extends RunScriptPayload {
-  onError: (error: string) => any;
-  onSuccess: (data: any) => any;
 }
 
 const PyodideWorkerProvider: React.VoidFunctionComponent<PyodideProviderProps> =
@@ -28,7 +14,7 @@ const PyodideWorkerProvider: React.VoidFunctionComponent<PyodideProviderProps> =
     const worker = React.useRef<any>(null);
 
     const runScript = React.useCallback(
-      ({ packages, context, script, onSuccess, onError }: RunScriptSetup) => {
+      ({ packages, context, script, onSuccess, onError }: PyodideRunScript) => {
         if (worker.current) {
           worker.current.onerror = onError;
           worker.current.onmessage = onSuccess;
@@ -43,7 +29,7 @@ const PyodideWorkerProvider: React.VoidFunctionComponent<PyodideProviderProps> =
     );
 
     const asyncRun = React.useCallback(
-      ({ packages, context, script }: RunScriptPayload) => {
+      ({ packages, context, script }: PyodidePayLoad) => {
         return new Promise(function (onSuccess, onError) {
           runScript({ packages, context, script, onSuccess, onError });
         });
@@ -67,7 +53,6 @@ const PyodideWorkerProvider: React.VoidFunctionComponent<PyodideProviderProps> =
     return (
       <PyodideContext.Provider
         value={{
-          pyodide: worker.current,
           asyncRun,
           runScript,
         }}

@@ -5,8 +5,16 @@ export interface PyodideState {
   return?: any;
 }
 
+type Package = string;
+type Context = Object;
+type Script = string;
+
 export interface PyodidePayLoad {
-  packages?: string[];
-  context?: Object;
-  script?: string;
+  packages?: Package[];
+  context?: Context;
+  script?: Script;
+}
+export interface PyodideRunScript extends PyodidePayLoad {
+  onError: (error: string) => any;
+  onSuccess: (data: any) => any;
 }
