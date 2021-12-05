@@ -8,26 +8,44 @@ interface PyodideProviderProps {
   children?: React.ReactNode;
 }
 
+type Package = string;
+type Context = Record<string, any>;
+type Script = string;
+
+interface RunScriptPayload {
+  packages: Array<Package>;
+  context: Context;
+  script: Script;
+}
+
 const PyodideProvider: React.VoidFunctionComponent<PyodideProviderProps> = ({
   children,
 }) => {
   const worker = React.useRef<any>(null);
 
-  /*eslint-disable*/ /*@ts-ignore*/
-  const runScript = (packages, context, script, onSuccess, onError) => {
-    if (worker.current) {
-      worker.current.onerror = onError;
-      worker.current.onmessage = onSuccess;
-      worker.current.postMessage({
-        packages,
-        context,
-        script,
-      });
-    }
-  };
+  const runScript = React.useCallback(
+    (
+      packages: Array<Package>,
+      context: Context,
+      script: Script,
+      onSuccess: (data: any) => any,
+      onError: (error: string) => any
+    ) => {
+      if (worker.current) {
+        worker.current.onerror = onError;
+        worker.current.onmessage = onSuccess;
+        worker.current.postMessage({
+          packages,
+          context,
+          script,
+        });
+      }
+    },
+    []
+  );
 
   const asyncRun = React.useCallback(
-    ({ packages, context, script }) => {
+    ({ packages, context, script }: RunScriptPayload) => {
       return new Promise(function (onSuccess, onError) {
         runScript(packages, context, script, onSuccess, onError);
       });

@@ -183,7 +183,8 @@ const PyodideSlide: React.VoidFunctionComponent = () => {
           editorProps={{ $blockScrolling: true }}
         />
         <Button onClick={handleScriptExecute}>Execute Script</Button>
-        <div> {JSON.stringify(pyodideState)}</div>
+        <div> {pyodideState.return && pyodideState.return.error}</div>
+        <div>{JSON.stringify(pyodideState)}</div>
       </div>
     </div>
   );
