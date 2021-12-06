@@ -1,6 +1,5 @@
 /* eslint-disable */
 importScripts("pyodide/pyodide.js");
-
 async function loadPyodideInWorker() {
   self.pyodide = await loadPyodide({
     indexURL: "pyodide",
