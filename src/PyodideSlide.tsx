@@ -34,7 +34,9 @@ const createDefaultScript = (
   }\n###<Script>###\n${mainScriptScript}`;
 };
 const removeImportFromScript = (pkg: string, script: string) => {
-  const importRegex = new RegExp(`import ${pkg}[\\s\\w]*\n`);
+  const importRegex = new RegExp(
+    `(import ${pkg}[\\s\\w]*\n)|(from ${pkg} import)`
+  );
   return script.replace(importRegex, "");
 };
 const refreshContextVarFromScript = (

@@ -1,8 +1,7 @@
 import React from "react";
 import "./App.css";
-// @ts-ignore
 import PyodideWorkerProvider from "./pyodideContext/PyodideWorkerProvider";
-import PyodideSlide from "./PyodideSlide"; /* eslint-disable */
+import PyodideSlide from "./PyodideSlide";
 
 function App() {
   return (

@@ -5,9 +5,9 @@ export interface PyodideState {
   return?: any;
 }
 
-type Package = string;
-type Context = Object;
-type Script = string;
+export type Package = string;
+export type Context = Object;
+export type Script = string;
 
 export interface PyodidePayLoad {
   packages?: Package[];
