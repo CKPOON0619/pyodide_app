@@ -1,7 +1,13 @@
 import * as React from "react";
-import { usePyodide } from "./pyodideContext";
+import { usePyodide } from "../pyodideContext";
 import { Button, Upload, Select, Form } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
+import {
+  refreshContextVarInScript,
+  addPackagesToScript,
+  removePackagesFromScript,
+  commentHeaders,
+} from "./scriptHelper";
 import * as CSV from "csv-string";
 
 import AceEditor from "react-ace";
@@ -12,53 +18,10 @@ import "ace-builds/src-noconflict/theme-ambiance";
 import "antd/dist/antd.css";
 import { RcFile } from "antd/lib/upload";
 
-const createDefaultScript = (
-  imports: Array<string>,
-  variables: Array<string>,
-  script: string
-) => {
-  const importSearch = script.match(
-    /###<Package imports>###\n([\n\w\W\s]*)\n###<Context/
-  );
-  const mainScriptSearch = script.split("###<Script>###");
-  const importScript = importSearch ? importSearch[1] : "";
-  const mainScriptScript =
-    mainScriptSearch.length > 1 ? mainScriptSearch[1] : "";
-  const newImports = imports
-    .map((lib) => `import ${lib}`)
-    .filter((importStatement) => script.search(importStatement) < 0);
-  return `###<Package imports>###${importScript ? `\n${importScript}` : ""}${
-    newImports.length > 0 ? "\n" + newImports.join("\n") : ""
-  }\n###<Context variables>###${
-    variables.length > 0 ? "\nfrom js import " + variables.join(", ") : ""
-  }\n###<Script>###\n${mainScriptScript}`;
-};
-const removeImportFromScript = (pkg: string, script: string) => {
-  const importRegex = new RegExp(
-    `(import ${pkg}[\\s\\w]*\n)|(from ${pkg} import)`
-  );
-  return script.replace(importRegex, "");
-};
-const refreshContextVarFromScript = (
-  varNames: Array<string>,
-  script: string
-) => {
-  return script.replace(
-    /###<Context variables>###\n([\W\w]*)###<Script>###/,
-    varNames.length > 0
-      ? `###<Context variables>###\nfrom js import ${varNames.join(
-          ", "
-        )}\n###<Script>###`
-      : "###<Context variables>###\n###<Script>###"
-  );
-};
-
 const PyodideSlide: React.VoidFunctionComponent = () => {
   const { execScript, pyodideState } = usePyodide();
   const [packages, setPackages] = React.useState<Array<string>>([]);
-  const [script, setScript] = React.useState<string>(
-    "###<Package imports>###\n###<Context variables>###\n###<Script>###"
-  );
+  const [script, setScript] = React.useState<string>(commentHeaders.join("\n"));
 
   function onChange(newValue: string) {
     setScript(newValue);
@@ -66,7 +29,7 @@ const PyodideSlide: React.VoidFunctionComponent = () => {
 
   const { Option } = Select;
 
-  const packageOptions = ["numpy", "matplotlib", "scikit-learn"];
+  const packageOptions = ["numpy", "pandas"];
   const selectOptions: Array<React.ReactNode> = [];
   for (let i = 0; i < packageOptions.length; i++) {
     selectOptions.push(
@@ -81,7 +44,7 @@ const PyodideSlide: React.VoidFunctionComponent = () => {
       setAssets([...assets, file]);
       console.log([...assets, file].map((asset) => asset.name.split(".")[0]));
       setScript(
-        refreshContextVarFromScript(
+        refreshContextVarInScript(
           Array.from(
             new Set([...assets, file].map((asset) => asset.name.split(".")[0]))
           ),
@@ -95,16 +58,9 @@ const PyodideSlide: React.VoidFunctionComponent = () => {
   const handleFileRemove = React.useCallback(
     (file) => {
       const newAssets = assets.filter((f: RcFile) => f.uid !== file.uid);
-      console.log({ file, newAssets });
-      console.log(
-        refreshContextVarFromScript(
-          newAssets.map((asset) => asset.name.split(".")[0]),
-          script
-        )
-      );
       setAssets(newAssets);
       setScript(
-        refreshContextVarFromScript(
+        refreshContextVarInScript(
           newAssets.map((asset) => asset.name.split(".")[0]),
           script
         )
@@ -130,24 +86,17 @@ const PyodideSlide: React.VoidFunctionComponent = () => {
   const handlePackageAdd = React.useCallback(
     (packages) => {
       setPackages(packages);
-      setScript(
-        createDefaultScript(
-          packages,
-          assets.map((file: RcFile, idx) => file.name.split(".")[0]),
-          script
-        )
-      );
+      setScript(addPackagesToScript(packages, script));
     },
     [assets, script]
   );
 
   const handleDeselect = React.useCallback(
     (pkg: string) => {
-      setScript(removeImportFromScript(pkg, script));
+      setScript(removePackagesFromScript(pkg, script));
     },
     [script]
   );
-  console.log({ script });
   return (
     <div>
       <Upload
