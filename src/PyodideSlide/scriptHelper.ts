@@ -1,11 +1,19 @@
 import { Package, Script } from "../pyodideContext";
 
+export const packageHeader = "###<Package imports>###";
+export const contextHeader = "###<Context variables>###";
+export const scriptHeader = "###<Script>###";
+
+export const commentHeaders = [packageHeader, contextHeader, scriptHeader];
+
 export const addPackagesToScript = (
   packages: Array<Package>,
   script: Script
 ) => {
-  const scriptSearchRegex =
-    /###<Package imports>###([\n\w\W\s]*)###<Context variables>###/;
+  const scriptSearchRegex = new RegExp(
+    `${packageHeader}([\\n\\w\\W\\s]*)${contextHeader}`
+  );
+  // /###<Package imports>###([\n\w\W\s]*)###<Context variables>###/;
   const importSearch = script.match(scriptSearchRegex);
   const importScript = importSearch ? importSearch[1] : "";
   const newImports = packages.filter((pkg) => script.search(pkg) < 0);
@@ -18,7 +26,8 @@ export const addPackagesToScript = (
   );
 };
 export const removePackagesFromScript = (pkg: string, script: string) => {
-  const importRegex = new RegExp(`import ${pkg}[\\s\\w]*\n`);
+  const importRegex = new RegExp(`import ${pkg}[\\w\\s]*?\n`);
+  console.log(script.match(importRegex));
   return script.replace(importRegex, "");
 };
 export const refreshContextVarInScript = (
@@ -34,9 +43,3 @@ export const refreshContextVarInScript = (
       : "###<Context variables>###\n###<Script>###"
   );
 };
-
-export const commentHeaders = [
-  "###<Package imports>###",
-  "###<Context variables>###",
-  "###<Script>###",
-];
