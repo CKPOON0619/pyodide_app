@@ -17,7 +17,6 @@ export const addPackagesToScript = (
   const importSearch = script.match(scriptSearchRegex);
   const importScript = importSearch ? importSearch[1] : "";
   const newImports = packages.filter((pkg) => script.search(pkg) < 0);
-  console.log({ importSearch, importScript });
   return script.replace(
     scriptSearchRegex,
     `###<Package imports>###${importScript}${newImports
@@ -27,7 +26,6 @@ export const addPackagesToScript = (
 };
 export const removePackagesFromScript = (pkg: string, script: string) => {
   const importRegex = new RegExp(`import ${pkg}[\\w\\s]*?\n`);
-  console.log(script.match(importRegex));
   return script.replace(importRegex, "");
 };
 export const refreshContextVarInScript = (
