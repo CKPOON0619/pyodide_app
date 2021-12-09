@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <script src="/static/js/src/js/pyodide/pyodide.js"></script>
+    <script src="static/js/pyodide/pyodide.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta
@@ -28,7 +28,30 @@
     <title>React App</title>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <script type="text/javascript">
+      loadPyodide({
+        indexURL: "/static/js/pyodide",
+      }).then((pyodide) => {
+        pyodide.loadPackage(["matplotlib"]).then(() => {
+          pyodide.runPython(`
+                import matplotlib.pyplot as plt
+                import io, base64
+
+                fig, ax = plt.subplots()
+                ax.plot([1,3,2])
+
+                buf = io.BytesIO()
+                fig.savefig(buf, format='png')
+                buf.seek(0)
+                img_str = 'data:image/png;base64,' + base64.b64encode(buf.read()).decode('UTF-8')`);
+
+          document.getElementById("pyplotfigure").src = pyodide.globals.img_str;
+        });
+      });
+    </script>
+
+    <div id="textfield">A matplotlib figure:</div>
+    <div id="pyplotdiv"><img id="pyplotfigure" /></div>
     <div id="root"></div>
     <!--
       This HTML file is a template.
