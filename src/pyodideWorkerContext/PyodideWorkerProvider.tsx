@@ -2,7 +2,7 @@ import * as React from "react";
 
 /*@ts-ignore*/
 import PyodideWorker from "./pyodide.worker.js";
-import PyodideContext from "./PyodideContext";
+import PyodideWorkerContext from "./PyodideWorkerContext";
 import { PyodidePayLoad, PyodideRunScript } from "./types.js";
 
 interface PyodideProviderProps {
@@ -17,13 +17,12 @@ const PyodideWorkerProvider: React.VoidFunctionComponent<PyodideProviderProps> =
       setRestart(true);
     }, []);
 
-    const runScript = React.useCallback(
-      ({ packages, context, script, onSuccess, onError }: PyodideRunScript) => {
+    const setupWorker = React.useCallback(
+      ({ context, script, onSuccess, onError }: PyodideRunScript) => {
         if (worker.current) {
           worker.current.onerror = onError;
           worker.current.onmessage = onSuccess;
           worker.current.postMessage({
-            packages,
             context,
             script,
           });
@@ -32,13 +31,13 @@ const PyodideWorkerProvider: React.VoidFunctionComponent<PyodideProviderProps> =
       []
     );
 
-    const asyncRun = React.useCallback(
-      ({ packages, context, script }: PyodidePayLoad) => {
+    const runScript = React.useCallback(
+      ({ context, script }: PyodidePayLoad) => {
         return new Promise(function (onSuccess, onError) {
-          runScript({ packages, context, script, onSuccess, onError });
+          setupWorker({ context, script, onSuccess, onError });
         });
       },
-      [runScript]
+      [setupWorker]
     );
 
     React.useEffect(() => {
@@ -60,15 +59,14 @@ const PyodideWorkerProvider: React.VoidFunctionComponent<PyodideProviderProps> =
     }, [shouldRestart]);
 
     return (
-      <PyodideContext.Provider
+      <PyodideWorkerContext.Provider
         value={{
           restart,
-          asyncRun,
           runScript,
         }}
       >
         {children}
-      </PyodideContext.Provider>
+      </PyodideWorkerContext.Provider>
     );
   };
 

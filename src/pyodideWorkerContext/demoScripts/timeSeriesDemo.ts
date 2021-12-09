@@ -1,5 +1,3 @@
-import { Demo } from "./types";
-
 const script = `###<Package imports>###
 import numpy as np
 import pandas as pd
@@ -46,10 +44,4 @@ df_ts.index=pd.date_range("1980-1-1", freq="M", periods=99) # Cast the index to 
 res=seasonal_decompose(df_ts['value'])
 print(res.trend,res.seasonal,res.resid)
 `;
-const packages = ["pandas", "numpy", "statsmodels"];
-
-const demo: Demo = {
-  packages,
-  script,
-};
-export default demo;
+export default script;

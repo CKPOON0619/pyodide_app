@@ -1,20 +1,20 @@
-export type State = "Start" | "Loading" | "Ready";
+export type State = "Start" | "Loading" | "Ready" | "Error";
 
+export type PyodideInstance = any; // TODO: To be typed
 export interface PyodideState {
   state: State;
   return?: any;
 }
 
-export type Package = string;
-export type Context = Object;
+export type Context = Record<string, any>;
 export type Script = string;
 
-export interface PyodidePayLoad {
-  packages?: Package[];
+export interface PyodideRunScriptPayload {
   context?: Context;
-  script?: Script;
+  script: Script;
 }
-export interface PyodideRunScript extends PyodidePayLoad {
-  onError: (error: string) => any;
-  onSuccess: (data: any) => any;
+export interface PyodideContextValue {
+  runScript: (payload: PyodideRunScriptPayload) => void;
+  pyodideInstance: PyodideInstance;
+  state?: PyodideState;
 }

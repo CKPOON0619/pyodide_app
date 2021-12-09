@@ -1,16 +1,19 @@
 import * as React from "react";
-import PyodideContext from "./PyodideContext";
+import PyodideWorkerContext, {
+  PyodideWorkerContextValue,
+} from "./PyodideWorkerContext";
 import { PyodideState, PyodidePayLoad } from "./types";
 
-export function usePyodide() {
-  const PyodideContextValue: any = React.useContext(PyodideContext);
-  if (!PyodideContextValue) {
+export function usePyodideWorker() {
+  const PyodideWorkerContextValue =
+    React.useContext<PyodideWorkerContextValue>(PyodideWorkerContext);
+  if (!PyodideWorkerContextValue) {
     throw new Error(
       "Pyodide not provided via React context. Did you forget to wrap your component with <PyodideProvider />?"
     );
   }
 
-  const { asyncRun, restart: pyodideRestart } = PyodideContextValue;
+  const { runScript, restart: pyodideRestart } = PyodideWorkerContextValue;
   const [pyodideState, setPyodideState] = React.useState<PyodideState>({
     state: "Start",
   });
@@ -19,11 +22,11 @@ export function usePyodide() {
     pyodideRestart();
     setPyodideState({ state: "Start" });
   }, [pyodideRestart]);
+
   const execScript = React.useCallback(
-    ({ packages, context, script }: PyodidePayLoad) => {
+    ({ context, script }: PyodidePayLoad) => {
       setPyodideState({ state: "Loading" });
-      const runResult = asyncRun({
-        packages,
+      const runResult = runScript({
         context,
         script,
       });
@@ -31,7 +34,7 @@ export function usePyodide() {
         setPyodideState({ state: "Ready", return: res.data });
       });
     },
-    [asyncRun]
+    [runScript]
   );
 
   return {

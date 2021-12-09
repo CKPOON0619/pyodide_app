@@ -1,3 +1,3 @@
 export * from "./types";
-export * from "./usePyodide";
-export { default as PyodideWorkerProvider } from "./PyodideWorkerProvider";
+export { default as PyodideContext } from "./PyodideContext";
+export { default as PyodideProvider } from "./PyodideProvider";

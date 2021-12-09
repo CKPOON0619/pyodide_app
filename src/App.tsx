@@ -1,45 +1,39 @@
 import React from "react";
 import "./App.css";
-import PyodideWorkerProvider from "./pyodideContext/PyodideWorkerProvider";
+import PyodideProvider from "./pyodideContext/PyodideProvider";
+import PyodideWorkerProvider from "./pyodideWorkerContext/PyodideWorkerProvider";
+import PyodideWorkerSlide from "./PyodideWorkerSlide";
 import PyodideSlide from "./PyodideSlide";
+import { Switch, Form } from "antd";
 
-const script = `import numpy as np
-import pandas as pd
+const script = `
+import matplotlib.pyplot as plt
+import io, base64
 
-from statsmodels.graphics.tsaplots import plot_predict
-from statsmodels.tsa.arima_process import arma_generate_sample
-from statsmodels.tsa.arima.model import ARIMA
-from statsmodels.tsa.seasonal import seasonal_decompose
-arparams = np.array([0.75, -0.25])
-maparams = np.array([0.65, 0.35])
-arparams = np.r_[1, -arparams]
-maparams = np.r_[1, maparams]
-nobs = 250
-y = arma_generate_sample(arparams, maparams, nobs)
-dates = pd.date_range("1980-1-1", freq="M", periods=nobs)
-y = pd.Series(y, index=dates)
-res=seasonal_decompose(y)
-res.resid.plot()`;
+fig, ax = plt.subplots()
+ax.plot([1,3,2])
+
+buf = io.BytesIO()
+fig.savefig(buf, format='png')
+buf.seek(0)
+img_str = 'data:image/png;base64,' + base64.b64encode(buf.read()).decode('UTF-8')`;
 function App() {
-  React.useEffect(() => {
-    //@ts-ignore
-    // loadPyodide({
-    //   indexURL: "https://cdn.jsdelivr.net/pyodide/v0.18.1/full/",
-    // })
-    //   .then(async (pyodide: any) => {
-    //     await pyodide.loadPackage(["numpy", "pandas", "statsmodels"]);
-    //     return pyodide;
-    //   })
-    //   .then((pyodide: any) => {
-    //     console.log(pyodide.runPython(script));
-    //   });
-  }, []);
+  const [isWorkerMode, setIsWorkerMode] = React.useState<boolean>(true);
+  const handleModeSwitch = React.useCallback(() => {
+    setIsWorkerMode(!isWorkerMode);
+  }, [isWorkerMode]);
   return (
     <div className="App">
       <header className="App-header">
-        {/* <PyodideWorkerProvider>
-          <PyodideSlide />
-        </PyodideWorkerProvider> */}
+        <Form.Item label="Worker Mode:">
+          <Switch checked={isWorkerMode} onChange={handleModeSwitch} />
+        </Form.Item>
+
+        <PyodideProvider>
+          <PyodideWorkerProvider>
+            {isWorkerMode ? <PyodideWorkerSlide /> : <PyodideSlide />}
+          </PyodideWorkerProvider>
+        </PyodideProvider>
       </header>
     </div>
   );
