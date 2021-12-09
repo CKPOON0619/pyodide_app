@@ -32,7 +32,6 @@ const PyodideProvider: React.VoidFunctionComponent<PyodideProviderProps> = ({
     [pyodideInstance]
   );
 
-  console.log({ pyodideInstance });
   React.useEffect(() => {
     if (!pyodideInstance) {
       //@ts-ignore
@@ -43,10 +42,10 @@ const PyodideProvider: React.VoidFunctionComponent<PyodideProviderProps> = ({
           pyodide.loadPackage(["pandas"]);
           setPyodideInstance(pyodide);
           setState({ state: "Start" });
+        },
+        (error: Error) => {
+          console.warn("Pyodide loading failed.", error);
         }
-        // (error: Error) => {
-        //   console.warn("Pyodide loading failed.", error);
-        // }
       );
     }
   }, [pyodideInstance]);

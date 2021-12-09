@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Button, Upload } from "antd";
+import { Button, Tooltip, Upload } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { refreshContextVarInScript, commentHeaders } from "./scriptHelper";
 import * as CSV from "csv-string";
@@ -77,6 +77,7 @@ const PyodideSlide: React.VoidFunctionComponent = () => {
   }, [runScript, script, assets]);
 
   const pyplots = pyodideInstance && pyodideInstance.globals.get("__figures");
+  console.log({ pyplots });
   return (
     <div>
       <Upload
@@ -105,8 +106,10 @@ const PyodideSlide: React.VoidFunctionComponent = () => {
           {pyodideState && pyodideState.return && pyodideState.return.error}
         </div>
         <div id="pyplotdiv">
-          {Array.isArray(pyplots)
-            ? pyplots.map((plot) => <img src={plot} alt="" />)
+          {pyplots && pyplots.length > 0
+            ? Array(pyplots.length)
+                .fill(0)
+                .map((_, i) => <img key={i} src={pyplots.get(i)} alt="" />)
             : null}
         </div>
         <div style={{ fontSize: "small" }}>{JSON.stringify(pyodideState)}</div>

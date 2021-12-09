@@ -6,19 +6,19 @@ import PyodideWorkerSlide from "./PyodideWorkerSlide";
 import PyodideSlide from "./PyodideSlide";
 import { Switch, Form } from "antd";
 
-const script = `
-import matplotlib.pyplot as plt
-import io, base64
+// const script = `
+// import matplotlib.pyplot as plt
+// import io, base64
 
-fig, ax = plt.subplots()
-ax.plot([1,3,2])
+// fig, ax = plt.subplots()
+// ax.plot([1,3,2])
 
-buf = io.BytesIO()
-fig.savefig(buf, format='png')
-buf.seek(0)
-img_str = 'data:image/png;base64,' + base64.b64encode(buf.read()).decode('UTF-8')`;
+// buf = io.BytesIO()
+// fig.savefig(buf, format='png')
+// buf.seek(0)
+// img_str = 'data:image/png;base64,' + base64.b64encode(buf.read()).decode('UTF-8')`;
 function App() {
-  const [isWorkerMode, setIsWorkerMode] = React.useState<boolean>(true);
+  const [isWorkerMode, setIsWorkerMode] = React.useState<boolean>(false);
   const handleModeSwitch = React.useCallback(() => {
     setIsWorkerMode(!isWorkerMode);
   }, [isWorkerMode]);
