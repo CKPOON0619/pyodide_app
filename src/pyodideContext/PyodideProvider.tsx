@@ -18,7 +18,8 @@ const PyodideProvider: React.VoidFunctionComponent<PyodideProviderProps> = ({
         setState({ state: "Loading" });
         if (context) {
           for (const key of Object.keys(context)) {
-            pyodideInstance[key] = context[key];
+            //@ts-ignore
+            window[key] = context[key];
           }
         }
         await pyodideInstance.loadPackagesFromImports(script);
@@ -36,16 +37,16 @@ const PyodideProvider: React.VoidFunctionComponent<PyodideProviderProps> = ({
     if (!pyodideInstance) {
       //@ts-ignore
       loadPyodide({
-        indexURL: "https://cdn.jsdelivr.net/pyodide/v0.18.1/full/",
+        indexURL: "/static/js/pyodide",
       }).then(
         (pyodide: any) => {
           pyodide.loadPackage(["pandas"]);
           setPyodideInstance(pyodide);
           setState({ state: "Start" });
-        },
-        (error: Error) => {
-          console.warn("Pyodide loading failed.", error);
         }
+        // (error: Error) => {
+        //   console.warn("Pyodide loading failed.", error);
+        // }
       );
     }
   }, [pyodideInstance]);
