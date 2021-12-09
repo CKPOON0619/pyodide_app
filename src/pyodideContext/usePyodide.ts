@@ -10,10 +10,15 @@ export function usePyodide() {
     );
   }
 
-  const { asyncRun } = PyodideContextValue;
+  const { asyncRun, restart: pyodideRestart } = PyodideContextValue;
   const [pyodideState, setPyodideState] = React.useState<PyodideState>({
     state: "Start",
   });
+
+  const restart = React.useCallback(() => {
+    pyodideRestart();
+    setPyodideState({ state: "Start" });
+  }, [pyodideRestart]);
   const execScript = React.useCallback(
     ({ packages, context, script }: PyodidePayLoad) => {
       setPyodideState({ state: "Loading" });
@@ -30,6 +35,7 @@ export function usePyodide() {
   );
 
   return {
+    restart,
     execScript,
     pyodideState,
   };

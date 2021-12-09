@@ -11,6 +11,7 @@ interface PyodideContextValue {
     onSuccess,
     onError,
   }: PyodideRunScript) => any;
+  restart: () => void;
 }
 
 const PyodideContext = React.createContext<PyodideContextValue>({
@@ -18,6 +19,9 @@ const PyodideContext = React.createContext<PyodideContextValue>({
     throw new Error("Pyodide Provider values not initiated.");
   },
   runScript: () => {
+    throw new Error("Pyodide Provider values not initiated.");
+  },
+  restart: () => {
     throw new Error("Pyodide Provider values not initiated.");
   },
 });

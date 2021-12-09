@@ -19,7 +19,7 @@ import "antd/dist/antd.css";
 import { RcFile } from "antd/lib/upload";
 
 const PyodideSlide: React.VoidFunctionComponent = () => {
-  const { execScript, pyodideState } = usePyodide();
+  const { execScript, pyodideState, restart } = usePyodide();
   const [packages, setPackages] = React.useState<Array<string>>([]);
   const [script, setScript] = React.useState<string>(commentHeaders.join("\n"));
 
@@ -97,6 +97,9 @@ const PyodideSlide: React.VoidFunctionComponent = () => {
     },
     [script]
   );
+  const handleRestart = React.useCallback(() => {
+    restart();
+  }, []);
   return (
     <div>
       <Upload
@@ -133,9 +136,14 @@ const PyodideSlide: React.VoidFunctionComponent = () => {
           value={script}
           editorProps={{ $blockScrolling: true }}
         />
-        <Button onClick={handleScriptExecute}>Execute Script</Button>
-        <div> {pyodideState.return && pyodideState.return.error}</div>
-        <div>{JSON.stringify(pyodideState)}</div>
+        <div>
+          <Button onClick={handleRestart}>Restart Pyodide</Button>
+          <Button onClick={handleScriptExecute}>Execute Script</Button>
+        </div>
+        <div style={{ fontSize: "small" }}>
+          {pyodideState.return && pyodideState.return.error}
+        </div>
+        <div style={{ fontSize: "small" }}>{JSON.stringify(pyodideState)}</div>
       </div>
     </div>
   );

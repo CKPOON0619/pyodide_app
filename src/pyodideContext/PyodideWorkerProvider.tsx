@@ -12,6 +12,10 @@ interface PyodideProviderProps {
 const PyodideWorkerProvider: React.VoidFunctionComponent<PyodideProviderProps> =
   ({ children }) => {
     const worker = React.useRef<any>(null);
+    const [shouldRestart, setRestart] = React.useState<any>(false);
+    const restart = React.useCallback(() => {
+      setRestart(true);
+    }, []);
 
     const runScript = React.useCallback(
       ({ packages, context, script, onSuccess, onError }: PyodideRunScript) => {
@@ -38,8 +42,13 @@ const PyodideWorkerProvider: React.VoidFunctionComponent<PyodideProviderProps> =
     );
 
     React.useEffect(() => {
+      if (shouldRestart && worker.current) {
+        worker.current.terminate();
+        worker.current = null;
+      }
       if (!worker.current) {
         worker.current = new PyodideWorker();
+        setRestart(false);
       }
 
       return () => {
@@ -48,11 +57,12 @@ const PyodideWorkerProvider: React.VoidFunctionComponent<PyodideProviderProps> =
           worker.current = null;
         }
       };
-    }, []);
+    }, [shouldRestart]);
 
     return (
       <PyodideContext.Provider
         value={{
+          restart,
           asyncRun,
           runScript,
         }}
