@@ -9,11 +9,10 @@ async function loadPyodideInWorker() {
 }
 
 async function loadPackages(packages) {
-  const loadedPackages = new Set(self.packages);
+  const loadedPackages = new Set(Object.keys(self.loadedPackages));
   const newPackages = packages.filter((x) => !loadedPackages.has(x));
   if (newPackages) {
     await self.pyodide.loadPackage(newPackages);
-    self.packages = self.packages.concat(newPackages);
   }
 }
 
@@ -38,8 +37,7 @@ let pyodideReadyPromise = loadPyodideInWorker();
 self.onmessage = async (event) => {
   // make sure loading is done
   await pyodideReadyPromise;
-  const { script, packages, context } = event.data;
-  if (packages) await loadPackages(packages);
+  const { script, context } = event.data;
   if (context) setContext(context);
   if (script) executeAndPostResult(script);
 };

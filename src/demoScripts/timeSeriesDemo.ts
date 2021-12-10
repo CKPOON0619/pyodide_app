@@ -1,8 +1,7 @@
-import { Demo } from "./types";
-
 const script = `###<Package imports>###
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from statsmodels.tsa.stattools import adfuller, acf, pacf
 from statsmodels.tsa.arima_model import ARIMA
 from statsmodels.tsa.seasonal import seasonal_decompose
@@ -44,12 +43,16 @@ def difference(df,diff):
 # results = model.fit(disp=-1)
 df_ts.index=pd.date_range("1980-1-1", freq="M", periods=99) # Cast the index to date for seasonal decomposition to work.
 res=seasonal_decompose(df_ts['value'])
-print(res.trend,res.seasonal,res.resid)
-`;
-const packages = ["pandas", "numpy", "statsmodels"];
 
-const demo: Demo = {
-  packages,
-  script,
-};
-export default demo;
+## plots only work in non-worker 
+fig, axs = plt.subplots(3)
+fig.suptitle('Seasonal Breakdowns')
+axs[0].plot(res.trend)
+axs[1].plot(res.seasonal)
+axs[2].plot(res.resid)
+buf = io.BytesIO()
+fig.savefig(buf, format='png')
+buf.seek(0)
+__figures = ['data:image/png;base64,' + base64.b64encode(buf.read()).decode('UTF-8')]`;
+
+export default script;

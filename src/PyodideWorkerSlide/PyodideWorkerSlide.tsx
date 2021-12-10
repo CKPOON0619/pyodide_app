@@ -1,5 +1,6 @@
 import * as React from "react";
-import { Button, Upload } from "antd";
+import { usePyodideWorker } from "../pyodideWorkerContext";
+import { Button, Upload, Select } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { refreshContextVarInScript, commentHeaders } from "./scriptHelper";
 import * as CSV from "csv-string";
@@ -11,23 +12,11 @@ import "ace-builds/src-noconflict/theme-ambiance";
 
 import "antd/dist/antd.css";
 import { RcFile } from "antd/lib/upload";
-import { PyodideContextValue, PyodideContext } from "../pyodideContext";
 
-const PyodideSlide: React.VoidFunctionComponent = () => {
+const PyodideWorkerSlide: React.VoidFunctionComponent = () => {
+  const { execScript, pyodideState, restart } = usePyodideWorker();
   const [script, setScript] = React.useState<string>(commentHeaders.join("\n"));
-  const PyodideContextValue =
-    React.useContext<PyodideContextValue>(PyodideContext);
-  if (!PyodideContextValue) {
-    throw new Error(
-      "Pyodide not provided via React context. Did you forget to wrap your component with <PyodideProvider />?"
-    );
-  }
 
-  const {
-    runScript,
-    state: pyodideState,
-    pyodideInstance,
-  } = PyodideContextValue;
   function onChange(newValue: string) {
     setScript(newValue);
   }
@@ -73,10 +62,12 @@ const PyodideSlide: React.VoidFunctionComponent = () => {
         fileContents[idx],
       ])
     );
-    runScript({ script, context });
-  }, [runScript, script, assets]);
+    execScript({ script, context });
+  }, [execScript, script, assets]);
 
-  const pyplots = pyodideInstance && pyodideInstance.globals.get("__figures");
+  const handleRestart = React.useCallback(() => {
+    restart();
+  }, [restart]);
   return (
     <div>
       <Upload
@@ -99,17 +90,11 @@ const PyodideSlide: React.VoidFunctionComponent = () => {
           editorProps={{ $blockScrolling: true }}
         />
         <div>
+          <Button onClick={handleRestart}>Restart Pyodide</Button>
           <Button onClick={handleScriptExecute}>Execute Script</Button>
         </div>
         <div style={{ fontSize: "small" }}>
-          {pyodideState && pyodideState.return && pyodideState.return.error}
-        </div>
-        <div id="pyplotdiv">
-          {pyplots && pyplots.length > 0
-            ? Array(pyplots.length)
-                .fill(0)
-                .map((_, i) => <img key={i} src={pyplots.get(i)} alt="" />)
-            : null}
+          {pyodideState.return && pyodideState.return.error}
         </div>
         <div style={{ fontSize: "small" }}>{JSON.stringify(pyodideState)}</div>
       </div>
@@ -117,4 +102,4 @@ const PyodideSlide: React.VoidFunctionComponent = () => {
   );
 };
 
-export default PyodideSlide;
+export default PyodideWorkerSlide;

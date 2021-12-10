@@ -1,5 +1,3 @@
-import { Script } from "../pyodideWorkerContext";
-
 export const packageHeader = "###<Package imports>###";
 export const contextHeader = "###<Context variables>###";
 export const scriptHeader = "###<Script>###";
