@@ -21,17 +21,6 @@ const PyodideWorkerSlide: React.VoidFunctionComponent = () => {
     setScript(newValue);
   }
 
-  const { Option } = Select;
-
-  const packageOptions = ["numpy", "pandas"];
-  const selectOptions: Array<React.ReactNode> = [];
-  for (let i = 0; i < packageOptions.length; i++) {
-    selectOptions.push(
-      <Option value={packageOptions[i]} key={packageOptions[i]}>
-        {packageOptions[i]}
-      </Option>
-    );
-  }
   const [assets, setAssets] = React.useState<Array<RcFile>>([]);
   const handleFileLoad = React.useCallback(
     (file) => {
