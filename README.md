@@ -3,7 +3,6 @@ This is an experimental project to test implementation of pyodide with react.
 There are two different implementations here. One is through webworker and the other one is implemented on the main. 
 
 # Web worker 
-## Implementation 
 ### > Pyodide.worker.js
 Web worker implementation imports the script and load pyodide scripts in web worker context.
 ### >> PyodideWorkerProvider
@@ -14,7 +13,6 @@ Inside the provider, it uses a promise to track the script execution on the webw
 To handle the async execution and show the stages of execution in UI, `usePyodideWorker` hook is created to handle the state of execution of the script.
 
 # Main
-## Implementation
 Main implementation import the script at the main thread without an extra layer of web worker. The implementation is therefore simplier.
 ### > PyodideProvider
 PyodideProvider loads and hold pyodide directly. It provides an interface function `runScript` for script execution and it also provides the state of execution to the component directly.
